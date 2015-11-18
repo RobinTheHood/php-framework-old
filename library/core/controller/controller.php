@@ -194,6 +194,36 @@ abstract class Controller
         $repoClassname = $objClassname . 'Repository';
         $repo = new $repoClassname;
         $objs = $repo->getAll();
+        $structure = $repo->getStructure();
+
+        $rows = [];
+        foreach($objs as $obj) {
+            $value = array();
+            $value[] = $obj->getId();
+            foreach($structure as $attName => $definition) {
+                $getFunktion = 'get' . ucfirst($attName);
+                $getObjFunktion = substr($getFunktion, 0, strlen($getFunktion) - 2);
+                if ($definition[1]) {
+                    $value[] = [$obj->$getFunktion(), $obj->$getObjFunktion()];
+                } else {
+                    $value[] = $obj->$getFunktion();
+                }
+            }
+            $rows[] = $value;
+        }
+
+        $view = new DefaultView();
+        $view->showDefaultIndex($objClassname, $structure, $rows);
+    }
+
+    public function invokeDefaultIndexOld()
+    {
+        $objClassname = $this->_getObjClassname();
+        load_file('/app/repository/' . strtolower($objClassname) . '_repo.php');
+
+        $repoClassname = $objClassname . 'Repository';
+        $repo = new $repoClassname;
+        $objs = $repo->getAll();
         $objStruct = $repo->getStructure();
 
         foreach($objStruct as $key => $value) {

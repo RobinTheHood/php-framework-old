@@ -12,6 +12,12 @@ class Dispatcher extends Controller {
     private $_indexApp    = 'public';
     private $_indexModule = 'index';
     private $_indexAction = 'index';
+    private $_defaultRoute = ['app','module','id','action'];
+
+    public function setDefaultRoute($value)
+    {
+        $this->_defaultRoute = $value;
+    }
 
     public function setIndexApp($value)
     {
@@ -73,7 +79,14 @@ class Dispatcher extends Controller {
 
     private function _getQuery()
     {
-        parse_str($_SERVER['QUERY_STRING'], $query);
+        Debug::out('REQUEST_URI');
+        Debug::out($_SERVER['REQUEST_URI']);
+        Debug::out('QUERY_STRING');
+        Debug::out($_SERVER['QUERY_STRING']);
+        $query = $this->_parseUri($this->_defaultRoute);
+        Debug::out($query);
+
+
         if (!isset($query['app']) && !isset($query['module']) && !isset($query['action'])) {
             $query['app']       = $this->_indexApp;
             $query['module']    = $this->_indexModule;
@@ -88,11 +101,34 @@ class Dispatcher extends Controller {
             $query['module']    = $this->_indexModule;
         }
 
-        if (!isset($query['action']) && !isset($query['id'])) {
-            $query['action']    = $this->_indexAction;
+        if (!isset($query['action'])) {
+            if (!isset($query['id'])) {
+                $query['action']    = $this->_indexAction;
+            } else {
+                $query['action']    = '';
+            }
         }
+        $_GET = $query;
+
+        Debug::out($query);
 
         return $query;
+    }
+
+    private function _parseUri($route)
+    {
+        if (substr($_SERVER['REQUEST_URI'],0, 11) == '/index.php?') {
+            parse_str($_SERVER['QUERY_STRING'], $query);
+            return $query;
+        } else {
+            $array = explode('/', $_SERVER['REQUEST_URI']);
+            $array = array_filter($array);
+            $index = 0;
+            foreach($array as $value) {
+                $query[$route[$index++]] = $value;
+            }
+            return $query;
+        }
     }
 
     private function _getErrorQuery()

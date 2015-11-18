@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    AddDefaultCharset utf-8
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule .* index.php [L,QSA]
+    #RewriteRule ^([a-zA-Z\-\_]*)/*([a-zA-Z\-\_]*)/*([a-zA-Z\-\_]*)$ /index.php?app=$1&module=$2&action=$3
+</IfModule>
