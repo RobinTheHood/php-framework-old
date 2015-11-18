@@ -9,10 +9,11 @@ class Dispatcher extends Controller {
     private $_errorApp;
     private $_errorModule;
     private $_errorAction;
-    private $_indexApp    = 'public';
-    private $_indexModule = 'index';
-    private $_indexAction = 'index';
-    private $_defaultRoute = ['app','module','id','action'];
+    private $_indexApp      = 'public';
+    private $_indexModule   = 'index';
+    private $_indexAction   = '';
+    private $_showAction    = 'show';
+    private $_defaultRoute  = ['app','module','id','action'];
 
     public function setDefaultRoute($value)
     {
@@ -79,12 +80,12 @@ class Dispatcher extends Controller {
 
     private function _getQuery()
     {
-        Debug::out('REQUEST_URI');
-        Debug::out($_SERVER['REQUEST_URI']);
-        Debug::out('QUERY_STRING');
-        Debug::out($_SERVER['QUERY_STRING']);
+        //Debug::out('REQUEST_URI');
+        //Debug::out($_SERVER['REQUEST_URI']);
+        //Debug::out('QUERY_STRING');
+        //Debug::out($_SERVER['QUERY_STRING']);
         $query = $this->_parseUri($this->_defaultRoute);
-        Debug::out($query);
+        //Debug::out($query);
 
 
         if (!isset($query['app']) && !isset($query['module']) && !isset($query['action'])) {
@@ -105,12 +106,12 @@ class Dispatcher extends Controller {
             if (!isset($query['id'])) {
                 $query['action']    = $this->_indexAction;
             } else {
-                $query['action']    = '';
+                $query['action']    = $this->_showAction;
             }
         }
         $_GET = $query;
 
-        Debug::out($query);
+        //Debug::out($query);
 
         return $query;
     }

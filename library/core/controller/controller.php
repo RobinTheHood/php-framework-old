@@ -138,18 +138,8 @@ abstract class Controller
         return self::getSessionValue($name, $environment);
     }
 
-    /**
-     * Muss von einem anderen Controller implementiert werden. Die
-     * Hauptmethode die aufgrufen werden soll.
-     *
-     * @param void
-     */
-    abstract public function invoke();
 
-
-
-
-    public function invokeDefault()
+    public function invokeDefaultShow()
     {
         $objClassname = $this->_getObjClassname();
         $repoClassname = $objClassname . 'Repository';
@@ -216,34 +206,6 @@ abstract class Controller
         $view->showDefaultIndex($objClassname, $structure, $rows);
     }
 
-    public function invokeDefaultIndexOld()
-    {
-        $objClassname = $this->_getObjClassname();
-        load_file('/app/repository/' . strtolower($objClassname) . '_repo.php');
-
-        $repoClassname = $objClassname . 'Repository';
-        $repo = new $repoClassname;
-        $objs = $repo->getAll();
-        $objStruct = $repo->getStructure();
-
-        foreach($objStruct as $key => $value) {
-            $columnNames[] = $key;
-        }
-
-        $rows = array();
-        foreach($objs as $obj) {
-            $value = array();
-            $value[] = $obj->getId();
-            foreach($columnNames as $param) {
-                $getFunktion = 'get' . $param;
-                $value[] = $obj->$getFunktion();
-            }
-            $rows[] = $value;
-        }
-
-        $view = new DefaultView();
-        $view->showDefaultIndex($objClassname, $columnNames, $rows);
-    }
 
     public function invokeDefaultNew($url = '')
     {
