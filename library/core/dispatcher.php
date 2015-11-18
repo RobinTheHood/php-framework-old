@@ -80,13 +80,15 @@ class Dispatcher extends Controller {
 
     private function _getQuery()
     {
+        //Debug::out('REWRITTEN_URI');
+        //Debug::out($_SERVER["SCRIPT_NAME"] . '?' . $_SERVER["QUERY_STRING"]);
         //Debug::out('REQUEST_URI');
         //Debug::out($_SERVER['REQUEST_URI']);
         //Debug::out('QUERY_STRING');
         //Debug::out($_SERVER['QUERY_STRING']);
         $query = $this->_parseUri($this->_defaultRoute);
-        //Debug::out($query);
 
+        //Debug::out($query);
 
         if (!isset($query['app']) && !isset($query['module']) && !isset($query['action'])) {
             $query['app']       = $this->_indexApp;
@@ -118,11 +120,13 @@ class Dispatcher extends Controller {
 
     private function _parseUri($route)
     {
-        if (substr($_SERVER['REQUEST_URI'],0, 11) == '/index.php?') {
-            parse_str($_SERVER['QUERY_STRING'], $query);
+        $uri = $this->_getUri();
+
+        if ($uri['mode'] == 1 || $uri['mode'] == 3) {
+            parse_str($uri['query'], $query);
             return $query;
-        } else {
-            $array = explode('/', $_SERVER['REQUEST_URI']);
+        } elseif ($uri['mode'] == 2 || $uri['mode'] == 4) {
+            $array = explode('/', $uri['uri']);
             $array = array_filter($array);
             $index = 0;
             foreach($array as $value) {
@@ -130,6 +134,38 @@ class Dispatcher extends Controller {
             }
             return $query;
         }
+    }
+
+    private function _getUri()
+    {
+        if (!$this->_isUriRewritten()) {
+            if (substr($_SERVER['REQUEST_URI'], 0, 11) == '/index.php?') {
+                return ['mode' => 1, 'uri' => $_SERVER['REQUEST_URI'], 'query' => $_SERVER['QUERY_STRING']];
+            } else {
+                return ['mode' => 2, 'uri' => $_SERVER['REQUEST_URI'], 'query' => $_SERVER['QUERY_STRING']];
+            }
+        } else {
+            if ($_SERVER['QUERY_STRING']) {
+                return ['mode' => 3, 'uri' => $this->_getRewrittenUri, 'query' => $_SERVER['QUERY_STRING']];
+            } else {
+                return ['mode' => 4, 'uri' => $_SERVER['REQUEST_URI'], 'query' => $_SERVER['QUERY_STRING']];
+            }
+        }
+    }
+
+    private function _isUriRewritten()
+    {
+        $rewrittenUri = $this->_getRewrittenUri();
+        if ($rewrittenUri != $_SERVER['REQUEST_URI']) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function _getRewrittenUri()
+    {
+        return $_SERVER["SCRIPT_NAME"] . '?' . $_SERVER["QUERY_STRING"];
     }
 
     private function _getErrorQuery()
